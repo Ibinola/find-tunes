@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Find-tunes allows users to search for albums by artist name using the Spotify API. It includes form validation with zod and react-hook-form, and displays album data with responsive UI components
 
-## Getting Started
+## Features
 
-First, run the development server:
+- Search for albums by artist name.
+- Display album information, including image, name, release date, and a link to the album on Spotify.
+- Show Skeleton loaders while fetching data
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Installation
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Clone the repository:**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```sh
+   git clone https://github.com/Ibinola/find-tunes.git
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+2. **Navigate to the project directory:**
 
-## Learn More
+   ```bash
+   cd your-repo-name
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. **Install dependencies:**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   yarn install
+    # or
+    npm install
+    # or
+    pnpm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Required Environment Variables
 
-## Deploy on Vercel
+1. `NEXT_PUBLIC_CLIENT_ID` - Your Spotify API Client ID
+2. `NEXT_PUBLIC_CLIENT_SECRET` - Your Spotify API Client Secret
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Usage
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+To run the project locally:
+
+1. Start the development server
+   ```sh
+   yarn dev
+   ```
+2. Visit `http://localhost:3000` in your browser.
+
+### Project Structure
+
+- `app/page.tsx` - Main page where the album search form and results are displayed.
+- `components/` - Contains reusable UI components such as Input, Button, Card, and Skeleton.
+- `lib/utils.ts` - Utility functions and types, including albumType.
+- `components/ui/` - Includes custom UI components used in the project.

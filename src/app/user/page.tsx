@@ -1,106 +1,100 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import { Button } from "@/components/ui/button";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ReloadIcon } from "@radix-ui/react-icons"
+import { ReloadIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
+import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
-import { z } from "zod"
-
+import { z } from "zod";
+import { albumType } from "@/lib/utils";
+import Link from "next/link";
 
 export default function GetAlbum() {
-  const clientId = process.env.NEXT_PUBLIC_CLIENT_ID
-  const clientSecret = process.env.NEXT_PUBLIC_CLIENT_SECRET
+  const clientId = process.env.NEXT_PUBLIC_CLIENT_ID;
+  const clientSecret = process.env.NEXT_PUBLIC_CLIENT_SECRET;
 
-  const [accessToken, setAccessToken] = useState()
-  const [loading, setLoading] = useState(false)
-  const [albums, setAlbums] = useState([])
+  const [accessToken, setAccessToken] = useState();
+  const [loading, setLoading] = useState(false);
+  const [albums, setAlbums] = useState([]);
 
   // VALIDATE FORM
   const albumFormSchema = z.object({
     album_name: z.string().max(50, {
-      message: 'Enter a valid album name'
+      message: "Enter a valid album name",
     }),
-  })
+  });
 
   const form = useForm<z.infer<typeof albumFormSchema>>({
     resolver: zodResolver(albumFormSchema),
     defaultValues: {
       album_name: "",
     },
-  })
-
+  });
 
   // GET ACCESS TOKEN
   useEffect(() => {
     let authParams = {
-      method: 'POST',
+      method: "POST",
       headers: {
-        "Content-Type": 'application/x-www-form-urlencoded'
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      body:
-        `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`,
+      body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`,
     };
 
     fetch("https://accounts.spotify.com/api/token", authParams)
-      .then(result => result.json())
-      .then(data => {
+      .then((result) => result.json())
+      .then((data) => {
         setAccessToken(data.access_token);
       });
   }, [clientId, clientSecret]);
-
 
   // GET ARTIST, USING ACCESS TOKEN
   const search = async (album: z.infer<typeof albumFormSchema>) => {
     setLoading(true);
     try {
       let artistParams = {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
         },
       };
 
-      const response = await fetch(`https://api.spotify.com/v1/search?q=${album.album_name}&type=artist`, artistParams);
+      const response = await fetch(
+        `https://api.spotify.com/v1/search?q=${album.album_name}&type=artist`,
+        artistParams
+      );
       const artistData = await response.json();
-      // setAlbums(data.artists.items[0].id);
-      const artistId = artistData.artists.items[0].id
-      console.log(album.album_name)
-      console.log(artistId)
+      const artistId = artistData.artists.items[0].id;
 
-      const responseAlbum = await fetch(`https://api.spotify.com/v1/artists/${artistId}/albums?include_groups=album`, artistParams)
+      const responseAlbum = await fetch(
+        `https://api.spotify.com/v1/artists/${artistId}/albums?include_groups=album`,
+        artistParams
+      );
       const albumData = await responseAlbum.json();
-      const albumArray = albumData.items
-      setAlbums(albumArray)
-      console.log(albumArray)
+      const albumArray = albumData.items;
+      setAlbums(albumArray);
       setLoading(false);
-      form.reset()
+      form.reset();
     } catch (error) {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black text-white">
+    <div className="flex min-h-screen items-center justify-center ">
       <div className="w-full max-w-lg p-8 space-y-8">
         <div className="">
           <Form {...form}>
@@ -124,30 +118,55 @@ export default function GetAlbum() {
                     Searching
                   </>
                 ) : (
-                  'Search'
+                  "Search"
                 )}
               </Button>
             </form>
           </Form>
         </div>
         <div className="flex flex-col items-center space-y-4">
-          {albums.map((album, index) => (
-            <>
-              <Card key={index} className="w-full bg-gray-800 text-white p-4">
-                <CardHeader>
-                  {album.name}
-                </CardHeader>
-              </Card>
-
-
-              <Card>
-                {/* <img src={album.images[0]} alt="" /> */}
-              </Card>
-            </>
-          ))}
+          {loading
+            ? Array(10)
+                .fill(null)
+                .map((_, index) => (
+                  <Card
+                    key={index}
+                    className="w-[400px] bg-gray-800 text-white p-4 text-center"
+                  >
+                    <Skeleton className="w-48 h-48 mx-auto mb-4" />
+                    <Skeleton className="w-32 h-4 mx-auto mb-2" />
+                    <Skeleton className="w-48 h-4 mx-auto" />
+                  </Card>
+                ))
+            : albums.map((album: albumType) => (
+                <Card
+                  key={album.id}
+                  className="w-[400px] bg-gray-800 text-white p-4 text-center"
+                >
+                  <Image
+                    src={album.images[0]?.url}
+                    className="object-contain mx-auto"
+                    alt="album-image"
+                    width={200}
+                    height={200}
+                  />
+                  <CardContent>
+                    <p className="mt-3">{album.name}</p>
+                    <p>Release Date: {album.release_date}</p>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="text-black-400 hover:no-underline px-5 py-5 bg-transparent mt-4"
+                    >
+                      <Link href={album.external_urls.spotify} target="_blank">
+                        Album Link
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
         </div>
       </div>
     </div>
-
   );
 }
