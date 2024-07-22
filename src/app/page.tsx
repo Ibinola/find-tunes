@@ -10,6 +10,9 @@ export default function Home() {
           <span className="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-[#1db954] relative inline-block">
             <span className="relative text-white">tunes</span>
           </span>
+          <p className="text-sm mt-5">
+            Discover Albums From Your Favorite Artists
+          </p>
         </h1>
         <Button
           asChild
