@@ -1,3 +1,5 @@
+## find-tunes
+
 Find-tunes allows users to search for albums by artist name using the Spotify API. It includes form validation with zod and react-hook-form, and displays album data with responsive UI components
 
 ## Features
