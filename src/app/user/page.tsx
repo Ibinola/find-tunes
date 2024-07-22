@@ -45,19 +45,36 @@ export default function GetAlbum() {
 
   // GET ACCESS TOKEN
   useEffect(() => {
-    let authParams = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`,
+    const getAuthToken = async () => {
+      try {
+        const authParams = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: `grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`,
+        };
+
+        const response = await fetch(
+          "https://accounts.spotify.com/api/token",
+          authParams
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        // console.log(data.access_token);
+        setAccessToken(data.access_token);
+      } catch (error) {
+        console.error("Failed to fetch access token", error);
+      }
     };
 
-    fetch("https://accounts.spotify.com/api/token", authParams)
-      .then((result) => result.json())
-      .then((data) => {
-        setAccessToken(data.access_token);
-      });
+    if (clientId && clientSecret) {
+      getAuthToken();
+    }
   }, [clientId, clientSecret]);
 
   // GET ARTIST, USING ACCESS TOKEN
@@ -143,13 +160,19 @@ export default function GetAlbum() {
                   key={album.id}
                   className="w-[400px] bg-gray-800 text-white p-4 text-center"
                 >
-                  <Image
-                    src={album.images[0]?.url}
-                    className="object-contain mx-auto"
-                    alt="album-image"
-                    width={200}
-                    height={200}
-                  />
+                  {loading ? (
+                    <Card>
+                      <Skeleton className="h-[200px] w-[200px] rounded-xl" />
+                    </Card>
+                  ) : (
+                    <Image
+                      src={album.images[0]?.url}
+                      className="mx-auto"
+                      alt="album-image"
+                      width={200}
+                      height={200}
+                    />
+                  )}
                   <CardContent>
                     <p className="mt-3">{album.name}</p>
                     <p>Release Date: {album.release_date}</p>
